@@ -18,66 +18,47 @@ public class ProductRepositoryTests {
 	@Autowired
 	private ProductRepository repository;
 	
-	private long exintingId;
+	private long existingId;
 	private long nonExistingId;
 	private long countTotalProducts;
 	
 	@BeforeEach
 	void setUp() throws Exception {
-		exintingId = 1L;
+		existingId = 1L;
 		nonExistingId = 1000L;
 		countTotalProducts = 25L;
 	}
 	
 	@Test
-	public void SaveShouldsPersistWithAutoincrementWhenIdIssNull() {
+	public void saveShouldPersistWithAutoincrementWhenIdIsNull() {
+
 		Product product = Factory.createProduct();
-		product .setId(null);
+		product.setId(null);
 		
 		product = repository.save(product);
+		Optional<Product> result = repository.findById(product.getId());
 		
 		Assertions.assertNotNull(product.getId());
-		Assertions.assertEquals(countTotalProducts+1,product.getId() );
+		Assertions.assertEquals(countTotalProducts + 1L, product.getId());
+		Assertions.assertTrue(result.isPresent());
+		Assertions.assertSame(result.get(), product);
 	}
 	
 	@Test
 	public void deleteShouldDeleteObjectWhenIdExists() {
 		
+		repository.deleteById(existingId);
+
+		Optional<Product> result = repository.findById(existingId);
 		
-		
-		repository.deleteById(1L);
-		
-		Optional<Product> result = repository.findById(exintingId);
 		Assertions.assertFalse(result.isPresent());
 	}
 	
 	@Test
-	public void deleteShouldThrowEmptyResultDataAccessExceptionWhenIdNotExits () {
-		
-		
-		
-		Assertions.assertThrows(EmptyResultDataAccessException.class, () ->{
-			repository.deleteById(nonExistingId);
+	public void deleteShouldThrowEmptyResultDataAccessExceptionWhenIdDoesNotExist() {
+
+		Assertions.assertThrows(EmptyResultDataAccessException.class, () -> {
+			repository.deleteById(nonExistingId);			
 		});
-		
 	}
-	
-	@Test
-	public void findShouldFindByIdWhenIdExists() {
-		
-		repository.findById(2L);
-		
-		Optional<Product> result = repository.findById(2L);
-		Assertions.assertTrue(result.isPresent());
-	}
-	
-	@Test
-	public void findShouldFindByIdReturnNullWhenIdNotExists() {
-		
-		repository.findById(29L);
-		
-		Optional<Product> result = repository.findById(29L);
-		Assertions.assertTrue(result.isEmpty());
-	}
-	
 }
